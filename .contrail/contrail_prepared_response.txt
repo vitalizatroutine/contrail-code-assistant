@@ -76,7 +76,7 @@ function readFolderContents(folderPath: string): string {
       fileContents += readFolderContents(filePath);
     } else {
       const fileContent = fs.readFileSync(filePath, "utf8");
-      fileContents += `File: ${filePath}\n\n${fileContent}`;
+      fileContents += `File Path: ${filePath}\n\n${fileContent}`;
     }
   });
 
@@ -100,14 +100,16 @@ ${fileContents}`;
 }
 
 function applyPatch(): void {
-  exec(`git am < ${patchFilePath}`, (error, stdout, stderr) => {
+  exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error applying patch: ${error}`);
       return;
     }
+
     if (stderr) {
       console.error(`Error output: ${stderr}`);
     }
+
     console.log(`Patch applied successfully: ${stdout}`);
 
     // Save project contents and copy to clipboard after patch is applied
@@ -134,5 +136,3 @@ patchWatcher.on("change", () => {
   console.log(`Detected changes in ${patchFilePath}`);
   applyPatch();
 });
-
-

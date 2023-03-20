@@ -67,7 +67,7 @@ function readFolderContents(folderPath: string): string {
       fileContents += readFolderContents(filePath);
     } else {
       const fileContent = fs.readFileSync(filePath, "utf8");
-      fileContents += `File: ${filePath}\n\n${fileContent}`;
+      fileContents += `File Path: ${filePath}\n\n${fileContent}`;
     }
   });
 
@@ -90,15 +90,39 @@ ${fileContents}`;
   console.log("Project contents copied to clipboard");
 }
 
-function applyPatch(): void {
-  exec(`git am < ${patchFilePath}`, (error, stdout, stderr) => {
+function cancelPatch(): void {
+  exec(`git apply --abort`, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error applying patch: ${error}`);
+      console.error(`Error aborting patch: ${error}`);
+
       return;
     }
+
     if (stderr) {
       console.error(`Error output: ${stderr}`);
     }
+
+    console.log(`Patch aborted successfully: ${stdout}`);
+  });
+}
+
+function applyPatch(): void {
+  exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error applying patch: ${error}`);
+      cancelPatch();
+
+      return;
+    }
+
+    if (stderr) {
+      console.error(`Error output: ${stderr}`);
+
+      cancelPatch();
+
+      return;
+    }
+
     console.log(`Patch applied successfully: ${stdout}`);
 
     // Save project contents and copy to clipboard after patch is applied
