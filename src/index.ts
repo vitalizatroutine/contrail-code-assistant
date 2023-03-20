@@ -64,6 +64,9 @@ function readFolderContents(folderPath: string): string {
     const filePath = path.join(folderPath, fileName);
 
     if (fs.statSync(filePath).isDirectory()) {
+      if (ignoredDirectories.includes(fileName)) {
+        return;
+      }
       fileContents += readFolderContents(filePath);
     } else {
       const fileContent = fs.readFileSync(filePath, "utf8");
@@ -77,7 +80,7 @@ function readFolderContents(folderPath: string): string {
 function saveProjectContents(): void {
   const fileContents = readFolderContents(projectFolderPath);
   const generatedResponse = `
-Generate a git patch file that will describe project changes aimed to accomplish the following:
+Generate a git patch file (remember to end the diff with --) that will describe project changes aimed to accomplish the following:
 
 <continue here>
 

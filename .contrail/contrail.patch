@@ -4,7 +4,7 @@ index 0000000..abc1234
 +++ b/src/index.ts
 @@ -60,6 +60,9 @@ function readFolderContents(folderPath: string): string {
      const filePath = path.join(folderPath, fileName);
-
+ 
      if (fs.statSync(filePath).isDirectory()) {
 +      if (ignoredDirectories.includes(fileName)) {
 +        return;
@@ -12,3 +12,4 @@ index 0000000..abc1234
        fileContents += readFolderContents(filePath);
      } else {
        const fileContent = fs.readFileSync(filePath, "utf8");
+-- 
