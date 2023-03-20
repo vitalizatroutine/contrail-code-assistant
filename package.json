@@ -1,0 +1,32 @@
+{
+  "name": "contrail-code-assistant",
+  "version": "1.0.0",
+  "description": "Contrail Code Assistant",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/index.js",
+    "test:src": "ts-node src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitalizatroutine/contrail-code-assistant.git"
+  },
+  "keywords": [],
+  "author": "@vitalizatroutine",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitalizatroutine/contrail-code-assistant/issues"
+  },
+  "homepage": "https://github.com/vitalizatroutine/contrail-code-assistant#readme",
+  "dependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/minimist": "^1.2.2",
+    "chokidar": "^3.5.3",
+    "clipboardy": "^3.0.0",
+    "fs-extra": "^11.1.0",
+    "minimist": "^1.2.8",
+    "prettier": "^2.8.4",
+    "ts-node": "^10.9.1"
+  }
+}
