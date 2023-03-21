@@ -2,19 +2,31 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: #222;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 .container {
+    width: 80%;
     max-width: 800px;
-    margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
 }
 
 h1 {
     font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-flow: column;
     margin-bottom: 20px;
 }
 
@@ -25,21 +37,23 @@ label {
 }
 
 input {
-    display: block;
-    width: 100%;
     font-size: 16px;
-    padding: 5px;
-    margin-bottom: 20px;
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #444;
+    border: 1px solid #555;
+    color: #fff;
 }
 
 button {
     font-size: 16px;
-    padding: 5px 10px;
+    padding: 8px 16px;
     background-color: #3b98e2;
     color: #fff;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s;
+    border-radius: 5px;
 }
 
 button:hover {

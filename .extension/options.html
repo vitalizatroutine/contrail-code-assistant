@@ -7,10 +7,14 @@
 <body>
 <div class="container">
     <h1>ChatGPT Code Monitor Options</h1>
-    <label for="savePath">Save path:</label>
-    <input type="text" id="savePath" />
-    <label for="checkInterval">Check interval (in seconds):</label>
-    <input type="number" id="checkInterval" min="1" />
+    <div class="form-group">
+        <label for="savePath">Save path:</label>
+        <input type="text" id="savePath" />
+    </div>
+    <div class="form-group">
+        <label for="checkInterval">Check interval (in seconds):</label>
+        <input type="number" id="checkInterval" min="1" />
+    </div>
     <button id="saveButton">Save</button>
 </div>
 <script src="options.js"></script>
