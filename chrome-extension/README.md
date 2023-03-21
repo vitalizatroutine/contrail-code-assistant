@@ -9,7 +9,7 @@ ChatGPT Code Monitor is a browser extension that monitors ChatGPT conversations 
    - For Chrome:
      - Navigate to `chrome://extensions`.
      - Enable Developer Mode by clicking the toggle switch.
-     - Click "Load unpacked" and select the `.extension` folder in the project directory.
+     - Click "Load unpacked" and select the `chrome-extension` folder in the project directory.
 
 ## Usage
 
