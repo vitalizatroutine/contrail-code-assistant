@@ -1,15 +1,32 @@
-diff --git a/src/index.ts b/src/index.ts
+diff --git a/README.md b/README.md
 index 0000000..abc1234
---- a/src/index.ts
-+++ b/src/index.ts
-@@ -60,6 +60,9 @@ function readFolderContents(folderPath: string): string {
-     const filePath = path.join(folderPath, fileName);
+--- a/README.md
++++ b/README.md
+@@ -1,2 +1,23 @@
+ # Project Name
  
-     if (fs.statSync(filePath).isDirectory()) {
-+      if (ignoredDirectories.includes(fileName)) {
-+        return;
-+      }
-       fileContents += readFolderContents(filePath);
-     } else {
-       const fileContent = fs.readFileSync(filePath, "utf8");
--- 
++## Description
++
++This project is a file watcher and patch management system.
++
++## Usage
++
++1. Run `npm install` to install the required dependencies.
++2. Configure the environment variables or command line arguments as needed.
++3. Run `npm start` to start the application.
++
++## Configuration Options
++
++The following options can be configured via environment variables or command line arguments:
++
++- `PROJECT_FOLDER_PATH`: The path to the project folder where CCA will scan for changes.
++- `PATCH_FILE_NAME`: The file name for the generated patch file that CCA will use to apply changes each time file changes are detected.
++- `PATCH_FILE_PATH`: The path to the .patch file that will be used by CCA to apply project changes.
++- `OUTPUT_FILE_NAME`: The file name for the generated response file that CCA will overwrite each time project changes are detected.
++- `OUTPUT_FILE_PATH`: The target path for the generated response file.
++- `IGNORED_FILES`: Used to provide additional file names to ignore during project watch.
++- `IGNORED_DIRECTORIES`: Used to provide additional file directory names to ignore during project watch.
++
++Please ensure that your project is up to date with the latest changes and configurations.
++
+--

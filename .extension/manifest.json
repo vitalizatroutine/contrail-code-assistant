@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "ChatGPT Code Monitor",
+  "version": "1.0.0",
+  "description": "Monitor ChatGPT conversation for diff format code and save it to a file.",
+  "content_scripts": [
+    {
+      "matches": ["*://*.openai.com/*"],
+      "js": ["index.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": ["downloads", "storage"],
+  "options_page": "options.html"
+}

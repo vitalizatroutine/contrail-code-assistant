@@ -67,10 +67,11 @@ function readFolderContents(folderPath: string): string {
       if (ignoredDirectories.includes(fileName)) {
         return;
       }
+
       fileContents += readFolderContents(filePath);
     } else {
       const fileContent = fs.readFileSync(filePath, "utf8");
-      fileContents += `File Path: ${filePath}\n\n${fileContent}`;
+      fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
     }
   });
 

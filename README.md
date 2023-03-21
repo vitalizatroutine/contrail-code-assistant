@@ -8,44 +8,24 @@ This script automates the process of watching for changes in your Node.js projec
 
 ## Features
 
-- Watches for changes in the project folder and patch file.
-- Applies patch file using `git am` when changes are detected.
+- Watches for changes in the designated project patch file.
+- Applies patch file using `git apply` when changes are detected.
 - Saves the project contents to a file after the patch is applied.
-- Copies the project contents to the clipboard.
-
-## Prerequisites
-
-- Node.js installed
-- TypeScript installed (optional)
-- `ts-node` installed (if using TypeScript)
-- `minimist` installed
-- `chokidar` installed
-- `fs-extra` installed
-- `clipboardy` installed
-
-## Usage
 
 ### Set up the script
 
-1. Install the required packages:
+1. Install the package:
 
 ```sh
-npm install minimist chokidar fs-extra clipboardy
+npm install contrail-code-assistant --save
 ```
 
-If you're using TypeScript, also install ts-node:
-
-```sh
-npm install ts-node
-```
-
-2. Add the script file (watch_and_apply.js or watch_and_apply.ts) to your project.
-3. Update the scripts section in your package.json file:
+2. Update the scripts section in your package.json file:
 
 ```json
 {
   "scripts": {
-    "watch-and-apply": "node watch_and_apply.js" // or "ts-node watch_and_apply.ts" for TypeScript
+    "contrail": "node node_modules/contrail-code-assistant/dist/index.js"
     // ...
   }
 }
@@ -55,7 +35,7 @@ npm install ts-node
 
 You can run the script using the following command:
 ```sh
-npm run watch-and-apply
+npm run contrail
 ```
 
 You can also provide custom values for the project folder path, patch file path, output file name, and output file path using environment variables or command line arguments:
