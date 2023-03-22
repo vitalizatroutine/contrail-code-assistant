@@ -49,11 +49,11 @@ const additionalIgnoredFiles: string =
 const additionalIgnoredDirectories: string =
   argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
 
-const ignoredFiles: string[] = ["contrail_prepared_response.txt"].concat(
+const ignoredFiles: string[] = ["LICENSE"].concat(
   additionalIgnoredFiles?.split(",")
 );
 
-const ignoredDirectories: string[] = ["node_modules", "dist"].concat(
+const ignoredDirectories: string[] = [".vscode", ".idea", ".git", "node_modules", "dist", ".contrail"].concat(
   additionalIgnoredDirectories?.split(",")
 );
 
@@ -62,19 +62,22 @@ function readFolderContents(folderPath: string): string {
 
   const files = fs.readdirSync(folderPath);
   files.forEach((fileName) => {
-    if (ignoredFiles.includes(fileName)) return;
+    if (!ignoredFiles.includes(fileName)) {
 
-    const filePath = path.join(folderPath, fileName);
+      const filePath = path.join(folderPath, fileName);
 
-    if (fs.statSync(filePath).isDirectory()) {
-      if (ignoredDirectories.includes(fileName)) {
-        return;
+      if (fs.statSync(filePath).isDirectory()) {
+        if (!ignoredDirectories.includes(fileName)) {
+          fileContents += readFolderContents(filePath);
+        } else {
+          console.log("directory ignored", fileName);
+        }
+      } else {
+        const fileContent = fs.readFileSync(filePath, "utf8");
+        fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
       }
-
-      fileContents += readFolderContents(filePath);
     } else {
-      const fileContent = fs.readFileSync(filePath, "utf8");
-      fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
+      console.log("file ignored", fileName);
     }
   });
 
@@ -120,7 +123,7 @@ function applyPatch(): void {
 
 const projectWatcher = chokidar.watch(projectFolderPath, {
   persistent: true,
-  ignoreInitial: true,
+  ignoreInitial: true
 });
 
 projectWatcher.on("change", () => {
@@ -130,7 +133,7 @@ projectWatcher.on("change", () => {
 
 const patchWatcher = chokidar.watch(patchFilePath, {
   persistent: true,
-  ignoreInitial: true,
+  ignoreInitial: true
 });
 
 patchWatcher.on("change", () => {
