@@ -14,6 +14,9 @@ function saveToFile(filename, content) {
     const fullPath = savePath + filename;
     const message = { content: url, filename: fullPath };
 
+    console.log("Sending content to clipboard:", content);
+    navigator.clipboard.writeText(content);
+
     console.log("Sending message to background worker:", message);
     chrome.runtime.sendMessage(message);
 
@@ -22,23 +25,31 @@ function saveToFile(filename, content) {
 }
 
 function checkIfGenerating() {
-  const buttons = document.getElementsByTagName('button');
+  const streamingBlocks = document.getElementsByClassName("result-streaming");
+  const buttons = document.getElementsByTagName("button");
+  let generating = false;
 
   for (let i = 0; i < buttons.length; i++) {
-    if (buttons[i].textContent === 'Stop generating') {
-      console.log("Still generating a response. Aborting check.");
-
-      return true;
+    if (buttons[i].textContent === "Stop generating") {
+      generating = true;
     }
   }
 
-  return false;
+  if (streamingBlocks.length) {
+    generating = true;
+  }
+
+  if (generating) {
+    console.log("Still generating a response. Aborting check.");
+  }
+
+  return generating;
 }
 
 function checkNewMessages() {
   console.log("Checking for new messages...");
 
-  if (checkIfGenerating()) return
+  if (checkIfGenerating()) return;
 
   const messages = document.querySelectorAll(".markdown");
 
@@ -55,12 +66,12 @@ function checkNewMessages() {
       const code = codeElement.textContent;
 
       if (isDiffFormat(code)) {
-        console.log("Diff format code found. Saving to file.", code);
         const filename = `contrail.patch`;
+
         saveToFile(filename, code);
       }
     } else {
-      console.log("Diff format code not found within block, continueing.");
+      console.log("Diff format code not found within block, continuing.");
     }
   }
 
@@ -72,7 +83,12 @@ chrome.storage.sync.get(["savePath", "checkInterval"], (result) => {
   const checkInterval = (result.checkInterval || 5) * 1000;
 
   console.log("Initialized ChatGPT Code Monitor");
-  console.log("Options:\n\nsavePath:", savePath, "\n\ncheckInterval:", checkInterval / 1000);
+  console.log(
+    "Options:\n\nsavePath:",
+    savePath,
+    "\n\ncheckInterval:",
+    checkInterval / 1000
+  );
 
   // Check for new messages based on the stored interval
   setInterval(checkNewMessages, checkInterval);

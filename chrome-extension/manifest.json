@@ -3,6 +3,9 @@
   "name": "ChatGPT Code Monitor",
   "version": "1.0.0",
   "description": "Monitor ChatGPT conversation for diff format code and save it to a file.",
+  "icons": {
+    "48": "contrail.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.openai.com/*"],

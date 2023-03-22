@@ -1,9 +1,12 @@
 import chokidar from "chokidar";
 import { exec } from "child_process";
+import dotenv from "dotenv";
 import fs from "fs-extra";
 import path from "path";
-// import clipboardy from "clipboardy";
+import clipboard from "clipboardy";
 import minimist from "minimist";
+
+dotenv.config();
 
 interface Arguments {
   // The path to the project folder where CCA will scan for changes
@@ -90,39 +93,20 @@ Here is the project content for context:
 ${fileContents}`;
   fs.writeFileSync(outputFilePath, generatedResponse, "utf8");
   console.log(`Project contents saved to ${outputFilePath}`);
-  // clipboardy.writeSync(generatedResponse);
+  clipboard.writeSync(generatedResponse);
   console.log("Project contents copied to clipboard");
-}
-
-function cancelPatch(): void {
-  exec(`git apply --abort`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error aborting patch: ${error}`);
-
-      return;
-    }
-
-    if (stderr) {
-      console.error(`Error output: ${stderr}`);
-    }
-
-    console.log(`Patch aborted successfully: ${stdout}`);
-  });
 }
 
 function applyPatch(): void {
   exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error applying patch: ${error}`);
-      cancelPatch();
 
       return;
     }
 
     if (stderr) {
       console.error(`Error output: ${stderr}`);
-
-      cancelPatch();
 
       return;
     }

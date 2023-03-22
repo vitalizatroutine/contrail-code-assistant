@@ -1,32 +1,15 @@
-diff --git a/README.md b/README.md
-index 0000000..abc1234
---- a/README.md
-+++ b/README.md
-@@ -1,2 +1,23 @@
- # Project Name
- 
-+## Description
-+
-+This project is a file watcher and patch management system.
-+
-+## Usage
-+
-+1. Run `npm install` to install the required dependencies.
-+2. Configure the environment variables or command line arguments as needed.
-+3. Run `npm start` to start the application.
-+
-+## Configuration Options
-+
-+The following options can be configured via environment variables or command line arguments:
-+
-+- `PROJECT_FOLDER_PATH`: The path to the project folder where CCA will scan for changes.
-+- `PATCH_FILE_NAME`: The file name for the generated patch file that CCA will use to apply changes each time file changes are detected.
-+- `PATCH_FILE_PATH`: The path to the .patch file that will be used by CCA to apply project changes.
-+- `OUTPUT_FILE_NAME`: The file name for the generated response file that CCA will overwrite each time project changes are detected.
-+- `OUTPUT_FILE_PATH`: The target path for the generated response file.
-+- `IGNORED_FILES`: Used to provide additional file names to ignore during project watch.
-+- `IGNORED_DIRECTORIES`: Used to provide additional file directory names to ignore during project watch.
-+
-+Please ensure that your project is up to date with the latest changes and configurations.
-+
+diff --git a/chrome-extension/manifest.json b/chrome-extension/manifest.json
+index 681f5b2..bc3fba3 100644
+--- a/chrome-extension/manifest.json
++++ b/chrome-extension/manifest.json
+@@ -3,6 +3,9 @@
+   "name": "ChatGPT Code Monitor",
+   "version": "1.0.0",
+   "description": "Monitor ChatGPT conversation for diff format code and save it to a file.",
++  "icons": {
++    "48": "icon.png"
++  },
+   "content_scripts": [
+     {
+       "matches": ["*://*.openai.com/*"],
 --
