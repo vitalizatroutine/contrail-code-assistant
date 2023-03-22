@@ -1,15 +1,26 @@
-diff --git a/chrome-extension/manifest.json b/chrome-extension/manifest.json
-index 681f5b2..bc3fba3 100644
---- a/chrome-extension/manifest.json
-+++ b/chrome-extension/manifest.json
-@@ -3,6 +3,9 @@
-   "name": "ChatGPT Code Monitor",
-   "version": "1.0.0",
-   "description": "Monitor ChatGPT conversation for diff format code and save it to a file.",
-+  "icons": {
-+    "48": "icon.png"
-+  },
-   "content_scripts": [
-     {
-       "matches": ["*://*.openai.com/*"],
---
+diff --git a/src/index.ts b/src/index.ts
+index f4c4ee9..9c5668a 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -118,23 +118,18 @@ function readFolderContents(folderPath: string): string {
+   const files = fs.readdirSync(folderPath);
+   files.forEach((fileName) => {
+     if (!ignoredFiles.includes(fileName)) {
+-      const filePath = path.join(folderPath, fileName);
++      const filePath = path.join(folderPath, fileName);
+       if (fs.statSync(filePath).isDirectory()) {
+         if (!ignoredDirectories.includes(fileName)) {
+           fileContents += readFolderContents(filePath);
+-        } else {
+-          console.log("directory ignored", fileName);
+         }
+       } else {
+         const fileContent = fs.readFileSync(filePath, "utf8");
+         fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
+       }
+-    } else {
+-      console.log("file ignored", fileName);
+     }
+   });
+   return fileContents;
+ }

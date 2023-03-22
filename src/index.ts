@@ -5,9 +5,7 @@ import fs from "fs-extra";
 import path from "path";
 import clipboard from "clipboardy";
 import minimist from "minimist";
-
 dotenv.config();
-
 interface Arguments {
   // The path to the project folder where CCA will scan for changes
   projectFolderPath?: string;
@@ -24,10 +22,8 @@ interface Arguments {
   // Used to provide additional file directory names to ignore during project watch
   ignoredDirectories?: string;
 }
-
 // @ts-ignore because this works
 const argv: Arguments = minimist(process.argv.slice(2));
-
 const projectFolderPath: string =
   argv.projectFolderPath || process.env.PROJECT_FOLDER_PATH || "src";
 const patchFileName: string =
@@ -48,24 +44,42 @@ const additionalIgnoredFiles: string =
   argv.ignoredFiles || process.env.IGNORED_FILES || "";
 const additionalIgnoredDirectories: string =
   argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
-
-const ignoredFiles: string[] = ["LICENSE"].concat(
+const ignoredFiles: string[] = ["LICENSE", "package-lock.json"].concat(
   additionalIgnoredFiles?.split(",")
 );
-
-const ignoredDirectories: string[] = [".vscode", ".idea", ".git", "node_modules", "dist", ".contrail"].concat(
-  additionalIgnoredDirectories?.split(",")
-);
-
-function readFolderContents(folderPath: string): string {
-  let fileContents = "";
-
+const ignoredDirectories: string[] = [
+  ".vscode",
+  ".idea",
+  ".git",
+  "node_modules",
+  "dist",
+  ".contrail",
+].concat(additionalIgnoredDirectories?.split(","));
+function generateProjectTree(folderPath: string, depth: number = 0): string {
+  let treeContents = "";
   const files = fs.readdirSync(folderPath);
   files.forEach((fileName) => {
     if (!ignoredFiles.includes(fileName)) {
-
       const filePath = path.join(folderPath, fileName);
-
+      const indentation = "  ".repeat(depth);
+      if (fs.statSync(filePath).isDirectory()) {
+        if (!ignoredDirectories.includes(fileName)) {
+          treeContents += `${indentation}- ${fileName}/\n`;
+          treeContents += generateProjectTree(filePath, depth + 1);
+        }
+      } else {
+        treeContents += `${indentation}- ${filePath}\n`;
+      }
+    }
+  });
+  return treeContents;
+}
+function readFolderContents(folderPath: string): string {
+  let fileContents = "";
+  const files = fs.readdirSync(folderPath);
+  files.forEach((fileName) => {
+    if (!ignoredFiles.includes(fileName)) {
+      const filePath = path.join(folderPath, fileName);
       if (fs.statSync(filePath).isDirectory()) {
         if (!ignoredDirectories.includes(fileName)) {
           fileContents += readFolderContents(filePath);
@@ -80,62 +94,50 @@ function readFolderContents(folderPath: string): string {
       console.log("file ignored", fileName);
     }
   });
-
   return fileContents;
 }
-
 function saveProjectContents(): void {
   const fileContents = readFolderContents(projectFolderPath);
+  const projectTree = generateProjectTree(projectFolderPath);
   const generatedResponse = `
-Generate a git patch file (remember to end the diff with --) that will describe project changes aimed to accomplish the following:
-
-<continue here>
-
-Here is the project content for context:
-
+Generate a git patch file (remember to end the diff with -- and don't generate empty lines) that will describe project changes aimed to accomplish the following:\n
+<continue here>\n
+Here is the project tree for context:\n
+${projectTree}
+Here is the project content for context:\n
 ${fileContents}`;
   fs.writeFileSync(outputFilePath, generatedResponse, "utf8");
   console.log(`Project contents saved to ${outputFilePath}`);
   clipboard.writeSync(generatedResponse);
   console.log("Project contents copied to clipboard");
 }
-
 function applyPatch(): void {
   exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error applying patch: ${error}`);
-
       return;
     }
-
     if (stderr) {
       console.error(`Error output: ${stderr}`);
-
       return;
     }
-
     console.log(`Patch applied successfully: ${stdout}`);
-
     // Save project contents and copy to clipboard after patch is applied
     saveProjectContents();
   });
 }
-
 const projectWatcher = chokidar.watch(projectFolderPath, {
   persistent: true,
-  ignoreInitial: true
+  ignoreInitial: true,
 });
-
 projectWatcher.on("change", () => {
   console.log(`Detected changes in ${projectFolderPath}`);
   saveProjectContents();
 });
-
 const patchWatcher = chokidar.watch(patchFilePath, {
   persistent: true,
-  ignoreInitial: true
+  ignoreInitial: true,
 });
-
 patchWatcher.on("change", () => {
   console.log(`Detected changes in ${patchFilePath}`);
   applyPatch();
