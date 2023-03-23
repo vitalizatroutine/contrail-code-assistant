@@ -1,5 +1,5 @@
 <p style="text-align: center">
-   <img width="128" height="128" src="contrail.png" />
+   <img style="display: inline-block;" width="128" height="128" src="https://github.com/vitalizatroutine/contrail-code-assistant/raw/main/contrail.png" />
 </p>
 
 # Contrail Code Assistant
