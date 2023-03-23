@@ -26,7 +26,11 @@ const outputFilePath = argv.outputFilePath ||
     `.contrail/${outputFileName}`;
 const additionalIgnoredFiles = argv.ignoredFiles || process.env.IGNORED_FILES || "";
 const additionalIgnoredDirectories = argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
-const ignoredFiles = ["LICENSE", "package-lock.json"].concat(additionalIgnoredFiles?.split(","));
+const ignoredFiles = [
+    "LICENSE",
+    "package-lock.json",
+    "contrail-code-assistant-1.0.0.tgz",
+].concat(additionalIgnoredFiles?.split(","));
 const ignoredDirectories = [
     ".vscode",
     ".idea",
