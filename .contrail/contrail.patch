@@ -1,26 +1,23 @@
-diff --git a/src/index.ts b/src/index.ts
-index f4c4ee9..9c5668a 100644
---- a/src/index.ts
-+++ b/src/index.ts
-@@ -118,23 +118,18 @@ function readFolderContents(folderPath: string): string {
-   const files = fs.readdirSync(folderPath);
-   files.forEach((fileName) => {
-     if (!ignoredFiles.includes(fileName)) {
--      const filePath = path.join(folderPath, fileName);
-+      const filePath = path.join(folderPath, fileName);
-       if (fs.statSync(filePath).isDirectory()) {
-         if (!ignoredDirectories.includes(fileName)) {
-           fileContents += readFolderContents(filePath);
--        } else {
--          console.log("directory ignored", fileName);
-         }
-       } else {
-         const fileContent = fs.readFileSync(filePath, "utf8");
-         fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
-       }
--    } else {
--      console.log("file ignored", fileName);
-     }
-   });
-   return fileContents;
- }
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Vitali Zatroutine <vitali.zatroutine@gmail.com>
+Date: Wed, 22 Mar 2023 00:00:00 +0000
+Subject: [PATCH] Improve background.js
+
+---
+ chrome-extension/background.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/chrome-extension/background.js b/chrome-extension/background.js
+index 07a7c12..8f6b1a6 100644
+--- a/chrome-extension/background.js
++++ b/chrome-extension/background.js
+@@ -1,7 +1,7 @@
+-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+-    console.log("Messaged received:", message);
++chrome.runtime.onMessage.addListener((message) => {
++    console.log("Message received:", message);
+     chrome.downloads.download({
+         url: message.content,
+         filename: message.filename
+     });
+ });

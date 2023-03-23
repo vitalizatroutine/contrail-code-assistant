@@ -9,17 +9,21 @@ dotenv.config();
 interface Arguments {
   // The path to the project folder where CCA will scan for changes
   projectFolderPath?: string;
-  // The file name for the generated patch file that CCA will use to apply changes each time file changes are detected
+  // The file name for the generated patch file that
+  // CCA will use to apply changes each time file changes are detected
   patchFileName?: string;
-  // The path to the .patch file that will be used by CCA to apply project changes
+  // The path to the .patch file that will be used by
+  // CCA to apply project changes
   patchFilePath?: string;
-  // The file name for the generated response file that CCA will overwrite each time project changes are detected
+  // The file name for the generated response file that
+  // CCA will overwrite each time project changes are detected
   outputFileName?: string;
   // The target path for the generated response file
   outputFilePath?: string;
   // Used to provide additional file names to ignore during project watch
   ignoredFiles?: string;
-  // Used to provide additional file directory names to ignore during project watch
+  // Used to provide additional file directory names to ignore
+  // during project watch
   ignoredDirectories?: string;
 }
 // @ts-ignore because this works
@@ -44,9 +48,11 @@ const additionalIgnoredFiles: string =
   argv.ignoredFiles || process.env.IGNORED_FILES || "";
 const additionalIgnoredDirectories: string =
   argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
-const ignoredFiles: string[] = ["LICENSE", "package-lock.json"].concat(
-  additionalIgnoredFiles?.split(",")
-);
+const ignoredFiles: string[] = [
+  "LICENSE",
+  "package-lock.json",
+  "contrail-code-assistant-1.0.0.tgz",
+].concat(additionalIgnoredFiles?.split(","));
 const ignoredDirectories: string[] = [
   ".vscode",
   ".idea",
@@ -83,15 +89,15 @@ function readFolderContents(folderPath: string): string {
       if (fs.statSync(filePath).isDirectory()) {
         if (!ignoredDirectories.includes(fileName)) {
           fileContents += readFolderContents(filePath);
-        } else {
-          console.log("directory ignored", fileName);
         }
       } else {
         const fileContent = fs.readFileSync(filePath, "utf8");
-        fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
+        const fileContentWithLineNumbers = fileContent
+          .split("\n")
+          .map((line, index) => `${index + 1}: ${line}`)
+          .join("\n");
+        fileContents += `File Path: ${filePath}\n\n${fileContentWithLineNumbers}\n\n`;
       }
-    } else {
-      console.log("file ignored", fileName);
     }
   });
   return fileContents;
@@ -100,7 +106,11 @@ function saveProjectContents(): void {
   const fileContents = readFolderContents(projectFolderPath);
   const projectTree = generateProjectTree(projectFolderPath);
   const generatedResponse = `
-Generate a git patch file (remember to end the diff with -- and don't generate empty lines) that will describe project changes aimed to accomplish the following:\n
+Please generate a standard git patch file for me. Consider the following:\n
+- I am the author: Vitali Zatroutine <vitali.zatroutine@gmail.com>
+- Ensure that the patch is not corrupt
+- Don't add empty lines or attempt to prettify the code\n
+Try to accomplish the following:\n
 <continue here>\n
 Here is the project tree for context:\n
 ${projectTree}

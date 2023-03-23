@@ -1,160 +1,330 @@
 
-Generate a git patch file (remember to end the diff with -- and don't generate empty lines) that will describe project changes aimed to accomplish the following:
+Please generate a standard git patch file for me. Consider the following:
+
+- I am the author: Vitali Zatroutine <vitali.zatroutine@gmail.com>
+- Ensure that the patch is not corrupt
+- Don't add empty lines or attempt to prettify the code
+
+Try to accomplish the following:
 
 <continue here>
 
 Here is the project tree for context:
 
-- src\index.ts
+- .gitignore
+- .npmrc
+- .prettierignore
+- .prettierrc
+- package.json
+- README.md
+- src/
+  - src\index.ts
+- tsconfig.json
 
 Here is the project content for context:
 
+File Path: .gitignore
+
+1: .idea
+2: .env
+3: 
+4: node_modules
+5: 
+6: .contrail/contrail
+7: 
+8: .npmrc
+
+File Path: .npmrc
+
+1: //registry.npmjs.org/:_authToken=${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}
+
+File Path: .prettierignore
+
+1: .contrail
+2: dist
+3: node_modules
+4: 
+
+File Path: .prettierrc
+
+1: {
+2:   "printWidth": 80,
+3:   "noEmptyLinesBetweenBlocks": true
+4: }
+5: 
+
+File Path: package.json
+
+1: {
+2:   "name": "contrail-code-assistant",
+3:   "version": "1.0.0",
+4:   "description": "Contrail Code Assistant",
+5:   "main": "dist/index.js",
+6:   "scripts": {
+7:     "build": "tsc",
+8:     "test": "node dist/index.js",
+9:     "test:src": "ts-node src/index.ts"
+10:   },
+11:   "repository": {
+12:     "type": "git",
+13:     "url": "git+https://github.com/vitalizatroutine/contrail-code-assistant.git"
+14:   },
+15:   "keywords": [],
+16:   "author": "@vitalizatroutine",
+17:   "license": "ISC",
+18:   "bugs": {
+19:     "url": "https://github.com/vitalizatroutine/contrail-code-assistant/issues"
+20:   },
+21:   "homepage": "https://github.com/vitalizatroutine/contrail-code-assistant#readme",
+22:   "dependencies": {
+23:     "@types/fs-extra": "^11.0.1",
+24:     "@types/minimist": "^1.2.2",
+25:     "chokidar": "^3.5.3",
+26:     "clipboardy": "^2.3.0",
+27:     "dotenv": "^16.0.3",
+28:     "fs-extra": "^11.1.0",
+29:     "minimist": "^1.2.8",
+30:     "prettier": "^2.8.6",
+31:     "ts-node": "^10.9.1"
+32:   }
+33: }
+34: 
+
+File Path: README.md
+
+1: <p style="text-align: center">
+2:    <img width="128" height="128" src="contrail.png" />
+3: </p>
+4: 
+5: # Contrail Code Assistant
+6: 
+7: This script automates the process of watching for changes in your Node.js project and applying a patch file when it's detected. When a patch is detected and applied, the script saves the project contents to a specified file and copies the file contents to the clipboard.
+8: 
+9: ## Features
+10: 
+11: - Watches for changes in the designated project patch file.
+12: - Applies patch file using `git apply` when changes are detected.
+13: - Saves the project contents to a file after the patch is applied.
+14: 
+15: ### Set up the script
+16: 
+17: 1. Install the package:
+18: 
+19: ```sh
+20: npm install contrail-code-assistant --save
+21: ```
+22: 
+23: 2. Update the scripts section in your package.json file:
+24: 
+25: ```json
+26: {
+27:   "scripts": {
+28:     "contrail": "node node_modules/contrail-code-assistant/dist/index.js"
+29:     // ...
+30:   }
+31: }
+32: ```
+33: 
+34: ## Run the script
+35: 
+36: You can run the script using the following command:
+37: ```sh
+38: npm run contrail
+39: ```
+40: 
+41: You can also provide custom values for the project folder path, patch file path, output file name, and output file path using environment variables or command line arguments:
+42: 
+43: 1. Using environment variables:
+44: ```sh
+45: PROJECT_FOLDER_PATH="./" PATCH_FILE_PATH=".openai/edits.patch" OUTPUT_FILE_NAME="project_contents.txt" OUTPUT_FILE="src/assets/project_contents.txt" npm run watch-and-apply
+46: ```
+47: 2. Using command line arguments:
+48: ``` sh
+49: npm run watch-and-apply -- --projectFolderPath="./" --patchFilePath=".openai/edits.patch" --outputFileName="project_contents.txt" --outputFile="src/assets/project_contents.txt"
+50: ```
+51: 
+52: You can use a combination of environment variables and command line arguments, with command line arguments taking precedence over environment variables.
+53: 
+54: ## Contributing
+55: If you'd like to contribute to this project, please feel free to submit a pull request or open an issue for discussion.
+56: 
+
 File Path: src\index.ts
 
-import chokidar from "chokidar";
-import { exec } from "child_process";
-import dotenv from "dotenv";
-import fs from "fs-extra";
-import path from "path";
-import clipboard from "clipboardy";
-import minimist from "minimist";
-dotenv.config();
-interface Arguments {
-  // The path to the project folder where CCA will scan for changes
-  projectFolderPath?: string;
-  // The file name for the generated patch file that CCA will use to apply changes each time file changes are detected
-  patchFileName?: string;
-  // The path to the .patch file that will be used by CCA to apply project changes
-  patchFilePath?: string;
-  // The file name for the generated response file that CCA will overwrite each time project changes are detected
-  outputFileName?: string;
-  // The target path for the generated response file
-  outputFilePath?: string;
-  // Used to provide additional file names to ignore during project watch
-  ignoredFiles?: string;
-  // Used to provide additional file directory names to ignore during project watch
-  ignoredDirectories?: string;
-}
-// @ts-ignore because this works
-const argv: Arguments = minimist(process.argv.slice(2));
-const projectFolderPath: string =
-  argv.projectFolderPath || process.env.PROJECT_FOLDER_PATH || "src";
-const patchFileName: string =
-  argv.patchFileName || process.env.PATCH_FILE_NAME || "contrail.patch";
-const patchFilePath: string =
-  argv.patchFilePath ||
-  process.env.PATCH_FILE_PATH ||
-  `.contrail/${patchFileName}`;
-const outputFileName: string =
-  argv.outputFileName ||
-  process.env.OUTPUT_FILE_NAME ||
-  "contrail_prepared_response.txt";
-const outputFilePath: string =
-  argv.outputFilePath ||
-  process.env.OUTPUT_FILE ||
-  `.contrail/${outputFileName}`;
-const additionalIgnoredFiles: string =
-  argv.ignoredFiles || process.env.IGNORED_FILES || "";
-const additionalIgnoredDirectories: string =
-  argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
-const ignoredFiles: string[] = ["LICENSE", "package-lock.json"].concat(
-  additionalIgnoredFiles?.split(",")
-);
-const ignoredDirectories: string[] = [
-  ".vscode",
-  ".idea",
-  ".git",
-  "node_modules",
-  "dist",
-  ".contrail",
-].concat(additionalIgnoredDirectories?.split(","));
-function generateProjectTree(folderPath: string, depth: number = 0): string {
-  let treeContents = "";
-  const files = fs.readdirSync(folderPath);
-  files.forEach((fileName) => {
-    if (!ignoredFiles.includes(fileName)) {
-      const filePath = path.join(folderPath, fileName);
-      const indentation = "  ".repeat(depth);
-      if (fs.statSync(filePath).isDirectory()) {
-        if (!ignoredDirectories.includes(fileName)) {
-          treeContents += `${indentation}- ${fileName}/\n`;
-          treeContents += generateProjectTree(filePath, depth + 1);
-        }
-      } else {
-        treeContents += `${indentation}- ${filePath}\n`;
-      }
-    }
-  });
-  return treeContents;
-}
-function readFolderContents(folderPath: string): string {
-  let fileContents = "";
-  const files = fs.readdirSync(folderPath);
-  files.forEach((fileName) => {
-    if (!ignoredFiles.includes(fileName)) {
-      const filePath = path.join(folderPath, fileName);
-      if (fs.statSync(filePath).isDirectory()) {
-        if (!ignoredDirectories.includes(fileName)) {
-          fileContents += readFolderContents(filePath);
-        } else {
-          console.log("directory ignored", fileName);
-        }
-        
-      } else {
-        const fileContent = fs.readFileSync(filePath, "utf8");
-        fileContents += `File Path: ${filePath}\n\n${fileContent}\n\n`;
-      }
-    } else {
-      console.log("file ignored", fileName);
-    }
-  });
-  return fileContents;
-}
-function saveProjectContents(): void {
-  const fileContents = readFolderContents(projectFolderPath);
-  const projectTree = generateProjectTree(projectFolderPath);
-  const generatedResponse = `
-Generate a git patch file (remember to end the diff with -- and don't generate empty lines) that will describe project changes aimed to accomplish the following:\n
-<continue here>\n
-Here is the project tree for context:\n
-${projectTree}
-Here is the project content for context:\n
-${fileContents}`;
-  fs.writeFileSync(outputFilePath, generatedResponse, "utf8");
-  console.log(`Project contents saved to ${outputFilePath}`);
-  clipboard.writeSync(generatedResponse);
-  console.log("Project contents copied to clipboard");
-}
-function applyPatch(): void {
-  exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error applying patch: ${error}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Error output: ${stderr}`);
-      return;
-    }
-    console.log(`Patch applied successfully: ${stdout}`);
-    // Save project contents and copy to clipboard after patch is applied
-    saveProjectContents();
-  });
-}
-const projectWatcher = chokidar.watch(projectFolderPath, {
-  persistent: true,
-  ignoreInitial: true,
-});
-projectWatcher.on("change", () => {
-  console.log(`Detected changes in ${projectFolderPath}`);
-  saveProjectContents();
-});
-const patchWatcher = chokidar.watch(patchFilePath, {
-  persistent: true,
-  ignoreInitial: true,
-});
-patchWatcher.on("change", () => {
-  console.log(`Detected changes in ${patchFilePath}`);
-  applyPatch();
-});
+1: import chokidar from "chokidar";
+2: import { exec } from "child_process";
+3: import dotenv from "dotenv";
+4: import fs from "fs-extra";
+5: import path from "path";
+6: import clipboard from "clipboardy";
+7: import minimist from "minimist";
+8: dotenv.config();
+9: interface Arguments {
+10:   // The path to the project folder where CCA will scan for changes
+11:   projectFolderPath?: string;
+12:   // The file name for the generated patch file that
+13:   // CCA will use to apply changes each time file changes are detected
+14:   patchFileName?: string;
+15:   // The path to the .patch file that will be used by
+16:   // CCA to apply project changes
+17:   patchFilePath?: string;
+18:   // The file name for the generated response file that
+19:   // CCA will overwrite each time project changes are detected
+20:   outputFileName?: string;
+21:   // The target path for the generated response file
+22:   outputFilePath?: string;
+23:   // Used to provide additional file names to ignore during project watch
+24:   ignoredFiles?: string;
+25:   // Used to provide additional file directory names to ignore
+26:   // during project watch
+27:   ignoredDirectories?: string;
+28: }
+29: // @ts-ignore because this works
+30: const argv: Arguments = minimist(process.argv.slice(2));
+31: const projectFolderPath: string =
+32:   argv.projectFolderPath || process.env.PROJECT_FOLDER_PATH || "src";
+33: const patchFileName: string =
+34:   argv.patchFileName || process.env.PATCH_FILE_NAME || "contrail.patch";
+35: const patchFilePath: string =
+36:   argv.patchFilePath ||
+37:   process.env.PATCH_FILE_PATH ||
+38:   `.contrail/${patchFileName}`;
+39: const outputFileName: string =
+40:   argv.outputFileName ||
+41:   process.env.OUTPUT_FILE_NAME ||
+42:   "contrail_prepared_response.txt";
+43: const outputFilePath: string =
+44:   argv.outputFilePath ||
+45:   process.env.OUTPUT_FILE ||
+46:   `.contrail/${outputFileName}`;
+47: const additionalIgnoredFiles: string =
+48:   argv.ignoredFiles || process.env.IGNORED_FILES || "";
+49: const additionalIgnoredDirectories: string =
+50:   argv.ignoredDirectories || process.env.IGNORED_DIRECTORIES || "";
+51: const ignoredFiles: string[] = [
+52:   "LICENSE",
+53:   "package-lock.json",
+54:   "contrail-code-assistant-1.0.0.tgz",
+55: ].concat(additionalIgnoredFiles?.split(","));
+56: const ignoredDirectories: string[] = [
+57:   ".vscode",
+58:   ".idea",
+59:   ".git",
+60:   "node_modules",
+61:   "dist",
+62:   ".contrail",
+63: ].concat(additionalIgnoredDirectories?.split(","));
+64: function generateProjectTree(folderPath: string, depth: number = 0): string {
+65:   let treeContents = "";
+66:   const files = fs.readdirSync(folderPath);
+67:   files.forEach((fileName) => {
+68:     if (!ignoredFiles.includes(fileName)) {
+69:       const filePath = path.join(folderPath, fileName);
+70:       const indentation = "  ".repeat(depth);
+71:       if (fs.statSync(filePath).isDirectory()) {
+72:         if (!ignoredDirectories.includes(fileName)) {
+73:           treeContents += `${indentation}- ${fileName}/\n`;
+74:           treeContents += generateProjectTree(filePath, depth + 1);
+75:         }
+76:       } else {
+77:         treeContents += `${indentation}- ${filePath}\n`;
+78:       }
+79:     }
+80:   });
+81:   return treeContents;
+82: }
+83: function readFolderContents(folderPath: string): string {
+84:   let fileContents = "";
+85:   const files = fs.readdirSync(folderPath);
+86:   files.forEach((fileName) => {
+87:     if (!ignoredFiles.includes(fileName)) {
+88:       const filePath = path.join(folderPath, fileName);
+89:       if (fs.statSync(filePath).isDirectory()) {
+90:         if (!ignoredDirectories.includes(fileName)) {
+91:           fileContents += readFolderContents(filePath);
+92:         }
+93:       } else {
+94:         const fileContent = fs.readFileSync(filePath, "utf8");
+95:         const fileContentWithLineNumbers = fileContent
+96:           .split("\n")
+97:           .map((line, index) => `${index + 1}: ${line}`)
+98:           .join("\n");
+99:         fileContents += `File Path: ${filePath}\n\n${fileContentWithLineNumbers}\n\n`;
+100:       }
+101:     }
+102:   });
+103:   return fileContents;
+104: }
+105: function saveProjectContents(): void {
+106:   const fileContents = readFolderContents(projectFolderPath);
+107:   const projectTree = generateProjectTree(projectFolderPath);
+108:   const generatedResponse = `
+109: Please generate a standard git patch file for me. Consider the following:\n
+110: - I am the author: Vitali Zatroutine <vitali.zatroutine@gmail.com>
+111: - Ensure that the patch is not corrupt
+112: - Don't add empty lines or attempt to prettify the code\n
+113: Try to accomplish the following:\n
+114: <continue here>\n
+115: Here is the project tree for context:\n
+116: ${projectTree}
+117: Here is the project content for context:\n
+118: ${fileContents}`;
+119:   fs.writeFileSync(outputFilePath, generatedResponse, "utf8");
+120:   console.log(`Project contents saved to ${outputFilePath}`);
+121:   clipboard.writeSync(generatedResponse);
+122:   console.log("Project contents copied to clipboard");
+123: }
+124: function applyPatch(): void {
+125:   exec(`git apply ${patchFilePath}`, (error, stdout, stderr) => {
+126:     if (error) {
+127:       console.error(`Error applying patch: ${error}`);
+128:       return;
+129:     }
+130:     if (stderr) {
+131:       console.error(`Error output: ${stderr}`);
+132:       return;
+133:     }
+134:     console.log(`Patch applied successfully: ${stdout}`);
+135:     // Save project contents and copy to clipboard after patch is applied
+136:     saveProjectContents();
+137:   });
+138: }
+139: const projectWatcher = chokidar.watch(projectFolderPath, {
+140:   persistent: true,
+141:   ignoreInitial: true,
+142: });
+143: projectWatcher.on("change", () => {
+144:   console.log(`Detected changes in ${projectFolderPath}`);
+145:   saveProjectContents();
+146: });
+147: const patchWatcher = chokidar.watch(patchFilePath, {
+148:   persistent: true,
+149:   ignoreInitial: true,
+150: });
+151: patchWatcher.on("change", () => {
+152:   console.log(`Detected changes in ${patchFilePath}`);
+153:   applyPatch();
+154: });
+155: 
 
+File Path: tsconfig.json
+
+1: {
+2:   "compilerOptions": {
+3:     "target": "ES2020",
+4:     "module": "CommonJS",
+5:     "outDir": "./dist",
+6:     "baseUrl": ".",
+7:     "strict": true,
+8:     "esModuleInterop": true,
+9:     "skipLibCheck": true,
+10:     "forceConsistentCasingInFileNames": true,
+11:     "resolveJsonModule": true,
+12:     "moduleResolution": "node",
+13:     "sourceMap": true,
+14:   },
+15:   "include": ["src/**/*.ts"],
+16:   "exclude": ["node_modules"]
+17: }
+18: 
 
